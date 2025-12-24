@@ -1,83 +1,60 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-// Setup cơ bản
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
-
-// Camera
 camera.position.set(0, 3, 8);
 
-// Điều khiển chuột
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-
-// 1. Tạo Cây Thông
-const treeGroup = new THREE.Group();
-const greenMaterial = new THREE.MeshStandardMaterial({ color: 0x064e3b, roughness: 0.8 });
-
-for(let i = 0; i < 4; i++) {
-    const geo = new THREE.ConeGeometry(2 - i * 0.4, 1.5, 32);
-    const layer = new THREE.Mesh(geo, greenMaterial);
+// Tạo cây thông & Ngôi sao
+const tree = new THREE.Group();
+const greenMat = new THREE.MeshStandardMaterial({ color: 0x064e3b });
+for(let i=0; i<4; i++) {
+    const layer = new THREE.Mesh(new THREE.ConeGeometry(2-i*0.4, 1.5, 32), greenMat);
     layer.position.y = i * 0.9;
-    treeGroup.add(layer);
+    tree.add(layer);
 }
+scene.add(tree);
 
-// Thân cây
-const trunkGeo = new THREE.CylinderGeometry(0.2, 0.2, 1, 12);
-const trunkMat = new THREE.MeshStandardMaterial({ color: 0x451a03 });
-const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-trunk.position.y = -0.8;
-treeGroup.add(trunk);
+const star = new THREE.Mesh(new THREE.SphereGeometry(0.3, 24, 24), new THREE.MeshBasicMaterial({ color: 0xffff00 }));
+star.position.y = 3.6;
+scene.add(star);
 
-scene.add(treeGroup);
+const particles = new THREE.Points(new THREE.BufferGeometry(), new THREE.PointsMaterial({ size: 0.05, color: 0xffffff }));
+const posArray = new Float32Array(1500 * 3);
+for(let i=0; i<4500; i++) posArray[i] = (Math.random() - 0.5) * 20;
+particles.geometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+scene.add(particles, new THREE.AmbientLight(0xffffff, 0.5));
 
-// 2. Ngôi sao trên đỉnh
-const starGeo = new THREE.SphereGeometry(0.2, 16, 16);
-const starMat = new THREE.MeshBasicMaterial({ color: 0xffdf00 });
-const topStar = new THREE.Mesh(starGeo, starMat);
-topStar.position.y = 3.6;
-scene.add(topStar);
-
-// 3. Hiệu ứng tuyết & hạt lung linh
-const particleCount = 2000;
-const positions = new Float32Array(particleCount * 3);
-for(let i = 0; i < particleCount * 3; i++) {
-    positions[i] = (Math.random() - 0.5) * 20;
-}
-const particleGeo = new THREE.BufferGeometry();
-particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-const particleMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.05, transparent: true });
-const particles = new THREE.Points(particleGeo, particleMat);
-scene.add(particles);
-
-// Ánh sáng
-const ambient = new THREE.AmbientLight(0xffffff, 0.4);
-scene.add(ambient);
-const pointLight = new THREE.PointLight(0xffffff, 1.5);
-pointLight.position.set(5, 5, 5);
-scene.add(pointLight);
-
-// Animation
-function animate() {
-    requestAnimationFrame(animate);
-    treeGroup.rotation.y += 0.005;
-    particles.rotation.y += 0.001;
-    particles.position.y -= 0.01;
-    if (particles.position.y < -5) particles.position.y = 5;
-    
-    controls.update();
-    renderer.render(scene, camera);
-}
-
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+// Nhận diện tay (MediaPipe)
+const hands = new Hands({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
+hands.setOptions({ maxNumHands: 1, minDetectionConfidence: 0.7 });
+hands.onResults((res) => {
+    if (res.multiHandLandmarks?.[0]) {
+        const finger = res.multiHandLandmarks[0][8];
+        particles.material.color.setRGB(finger.x, 1-finger.y, 0.5);
+        // Chạm ngôi sao
+        if (finger.y < 0.3 && finger.x > 0.4 && finger.x < 0.6) {
+            star.scale.set(2, 2, 2); star.material.color.setHex(0xffffff);
+        } else {
+            star.scale.set(1, 1, 1); star.material.color.setHex(0xffff00);
+        }
+    }
 });
 
+const cam = new Camera(document.createElement('video'), { onFrame: async () => await hands.send({image: cam.video}), width: 640, height: 480 });
+
+document.getElementById('playButton').onclick = () => {
+    document.getElementById('bgMusic').play();
+    cam.start();
+    document.getElementById('playButton').style.display = 'none';
+};
+
+function animate() {
+    requestAnimationFrame(animate);
+    tree.rotation.y += 0.005;
+    renderer.render(scene, camera);
+}
 animate();
