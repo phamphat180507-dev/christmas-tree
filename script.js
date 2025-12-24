@@ -47,14 +47,19 @@ hands.onResults((res) => {
 const cam = new Camera(document.createElement('video'), { onFrame: async () => await hands.send({image: cam.video}), width: 640, height: 480 });
 
 document.getElementById('playButton').onclick = () => {
-    document.getElementById('bgMusic').play();
-    cam.start();
+    const music = document.getElementById('bgMusic');
+    // Cố gắng phát nhạc, nếu lỗi thì vẫn chạy Camera và 3D
+    music.play().catch(() => console.log("Không tải được nhạc, nhưng cây vẫn sẽ xoay!"));
+    
+    if (typeof cam !== 'undefined') {
+        cam.start();
+    }
     document.getElementById('playButton').style.display = 'none';
 };
-
 function animate() {
     requestAnimationFrame(animate);
     tree.rotation.y += 0.005;
     renderer.render(scene, camera);
 }
 animate();
+
