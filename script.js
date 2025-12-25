@@ -93,3 +93,33 @@ const camera = new Camera(video, {
 });
 
 camera.start();
+// ===== SIMPLE HAND CONTROL =====
+let handOpen = false;
+
+const hands = new Hands({
+  locateFile: (file) =>
+    `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1640029074/${file}`
+});
+
+hands.setOptions({
+  maxNumHands: 1,
+  minDetectionConfidence: 0.7,
+  minTrackingConfidence: 0.7
+});
+
+hands.onResults((results) => {
+  handOpen = false;
+
+  if (results.multiHandLandmarks) {
+    const lm = results.multiHandLandmarks[0];
+
+    let fingers = 0;
+    if (lm[8].y < lm[6].y) fingers++;    // trỏ
+    if (lm[12].y < lm[10].y) fingers++;  // giữa
+    if (lm[16].y < lm[14].y) fingers++;  // áp út
+    if (lm[20].y < lm[18].y) fingers++;  // út
+
+    handOpen = fingers >= 3; // mở tay nếu >=3 ngón
+  }
+});
+
