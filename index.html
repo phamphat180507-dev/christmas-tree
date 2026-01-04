@@ -1,34 +1,24 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <title>🎄 Christmas Tree Hand Control</title>
-  <link rel="stylesheet" href="style.css" />
-
-  <!-- MediaPipe -->
- <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1640029074/camera_utils.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3.1640029074/drawing_utils.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1640029074/hands.js"></script>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hand Controlled Fireworks</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424515/hands.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.4.1646424515/camera_utils.js"></script>
 </head>
 <body>
+    <button id="startButton">🎆 Kích hoạt Pháo Hoa</button>
+    <div id="newYearText" class="hidden">HAPPY NEW YEAR!</div>
 
-<h1>🎄 Điều khiển cây thông bằng cử chỉ tay</h1>
+    <audio id="bgMusic" loop>
+        <source src="https://www.chosic.com/wp-content/uploads/2021/11/fireworks-display-by-lesfm.mp3" type="audio/mpeg">
+    </audio>
 
-<div class="container">
-  <video id="video" autoplay playsinline></video>
-  <canvas id="canvas"></canvas>
-</div>
-
-<p>
-✋ Mở tay → đèn nhấp nháy nhanh  
-<br>
-✊ Nắm tay → đèn nhấp nháy chậm  
-<br>
-⬆⬇ Đưa tay lên / xuống → thay đổi kích thước cây
-</p>
-
-<script src="script.js"></script>
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
+    </script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
-
