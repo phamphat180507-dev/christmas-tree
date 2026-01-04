@@ -31,3 +31,33 @@ body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Poppin
     84% { color: violet; text-shadow: 0 0 20px violet; }
     100% { color: red; text-shadow: 0 0 20px red; }
 }
+/* Thêm vào cuối file style.css */
+#newYearText {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 8vw;
+    font-weight: bold;
+    text-align: center;
+    color: white;
+    text-shadow: 0 0 20px #fff, 0 0 40px #ff00ff, 0 0 60px #00ffff;
+    z-index: 1000;
+    opacity: 0; /* Ẩn lúc đầu */
+    transition: opacity 2s ease-in-out;
+    pointer-events: none;
+}
+
+/* Khi có class này thì hiện lên và đổi màu */
+#newYearText.visible {
+    opacity: 1;
+    animation: rainbowText 5s infinite;
+}
+
+@keyframes rainbowText {
+    0% { color: #ff0000; text-shadow: 0 0 20px #ff0000; }
+    25% { color: #00ff00; text-shadow: 0 0 20px #00ff00; }
+    50% { color: #0000ff; text-shadow: 0 0 20px #0000ff; }
+    75% { color: #ffff00; text-shadow: 0 0 20px #ffff00; }
+    100% { color: #ff00ff; text-shadow: 0 0 20px #ff00ff; }
+}
